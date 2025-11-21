@@ -1,0 +1,138 @@
+# ================================================
+# FICHIER DOCKER-COMPOSE.YML
+# ================================================
+# Ce fichier configure les services Docker nécessaires pour le projet
+# Il définit 3 conteneurs : Elasticsearch, Kibana et Redis
+# ================================================
+version: '3.8'
+
+# ================================================
+# SECTION SERVICES
+# ================================================
+# Chaque service correspond à un conteneur Docker
+# ================================================
+services:
+  # ============================================
+  # SERVICE ELASTICSEARCH
+  # ============================================
+  # Elasticsearch est la base de données principale
+  # C'est ici que Ghita va stocker les tweets analysés
+  # ============================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+  
+    container_name: elasticsearch
+    environment:
+      # Mode single-node car on est en développement local
+      # Pas besoin d'un cluster pour ce projet
+      - discovery.type=single-node
+      # Activation de la sécurité (requis par défaut en v8)
+      # xpack.security.enabled=false désactive l'authentification pour simplifier
+      - xpack.security.enabled=false
+      # Configuration de la mémoire Java
+      # On limite à 1GB pour ne pas surcharger la machine
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # Désactivation des télémetries Elasticsearch (optionnel)
+      - xpack.security.enrollment.enabled=false
+      
+    # Ports exposés sur la machine hôte
+    ports:
+      - "9200:9200"
+      # Port 9300 : Communication inter-nœuds (non utilisé en single-node mais gardé)
+      - "9300:9300"
+      # Sans volumes, les données disparaissent quand on arrête le conteneur
+    volumes:
+      # Le dossier ./data/elasticsearch sur notre machine
+      # sera monté dans /usr/share/elasticsearch/data dans le conteneur
+      # comme ça, on garde les données même si on redémarre Docker
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    # Politique de redémarrage automatique
+    restart: unless-stopped
+    # Réseau pour que les services communiquent entre eux
+    networks:
+      - nosql-network
+
+  # ============================================
+  # SERVICE KIBANA
+  # ============================================
+  # Kibana est l'interface web pour visualiser les données d'Elasticsearch
+  # C'est ici que Aabir va créer ses dashboards
+  # Kibana dépend d'Elasticsearch, donc il faut attendre qu'Elasticsearch soit prêt
+  # ============================================
+  kibana:
+    # Image Docker officielle de Kibana version 8.11.0
+    # IMPORTANT : la version doit correspondre à celle d'Elasticsearch
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    environment:
+      # URL d'Elasticsearch
+      # http://elasticsearch:9200 car on utilise le nom du service
+      # Docker Compose crée un réseau DNS interne avec les noms des services
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      # Désactivation de la sécurité pour simplifier (comme Elasticsearch)
+      - xpack.security.enabled=false
+    # Ports exposés
+    ports:
+      # Port 5601 : Interface web de Kibana
+      # On accède à Kibana via http://localhost:5601 dans le navigateur
+      - "5601:5601" 
+    # Dépendances : Kibana attend qu'Elasticsearch soit démarré
+    depends_on:
+      - elasticsearch
+    volumes:
+      # Les configurations Kibana seront sauvegardées ici
+      - ./data/kibana:/usr/share/kibana/data
+    
+    # Redémarrage automatique
+    restart: unless-stopped
+    networks:
+      - nosql-network
+
+  # ============================================
+  # SERVICE REDIS
+  # ============================================
+  # Redis sert de file d'attente (queue) pour les tweets
+  # Latifah envoie les tweets ici via RPUSH
+  # Ghita lit les tweets avec LPOP
+  # ============================================
+  redis:
+    # Image Redis officielle version 7-alpine
+    # alpine = version légère basée sur Alpine Linux (plus petite)
+    image: redis:7-alpine
+    container_name: redis
+    # Commande pour démarrer Redis
+    command: redis-server --appendonly yes
+    # appendonly yes active la persistance des données
+    # Sinon, si Redis crash, on perd toutes les données en mémoire
+    # Ports exposés
+    ports:
+      - "6379:6379"
+    volumes:
+      # Sauvegarde des données Redis dans ./data/redis
+      - ./data/redis:/data
+    restart: unless-stopped
+    networks:
+      - nosql-network
+
+# ================================================
+# SECTION NETWORKS
+# ================================================
+# Création d'un réseau Docker privé
+# Tous les services peuvent communiquer via ce réseau
+# en utilisant leur nom de service comme adresse DNS
+# ================================================
+networks:
+  nosql-network:
+    # Type de réseau bridge (par défaut)
+    # Permet aux conteneurs de communiquer entre eux
+    driver: bridge
+
+# ================================================
+# NOTES IMPORTANTES
+# ================================================
+# 1. Pour démarrer tous les services : docker compose up -d
+# 2. Pour arrêter : docker compose stop
+# 3. Pour voir les logs : docker compose logs -f [service_name]
+# 4. Pour supprimer tout (données incluses) : docker compose down -v
+# 5. Vérifier que ça tourne : docker ps
+# ================================================

@@ -1,0 +1,27 @@
+.env
+logs/
+*.log
+rapport_validation.md
+data/
+# Environnement virtuel Python
+venv/
+env/
+ENV/
+.venv
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+# Fichiers OS
+.DS_Store
+Thumbs.db
+
+TODO.md
+env.example

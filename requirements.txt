@@ -1,0 +1,7 @@
+redis==5.0.1
+python-dotenv==1.0.0
+loguru==0.7.2
+Mastodon.py==2.1.4
+
+# Docker version 27.0.3, build 7d4bcd8
+# Docker Compose version v2.28.1-desktop.1
