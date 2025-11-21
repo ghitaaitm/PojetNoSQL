@@ -38,6 +38,8 @@ docker compose up -d
 
 Cela lance Redis, Elasticsearch et Kibana.
 
+**Note :** Les dossiers `data/elasticsearch`, `data/kibana` et `data/redis` seront créés automatiquement par Docker si ils n'existent pas. Tu n'as pas besoin de les créer manuellement.
+
 **Vérifie que les conteneurs tournent :**
 ```bash
 docker ps
