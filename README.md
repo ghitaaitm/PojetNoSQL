@@ -49,18 +49,16 @@ Mastodon API (Streaming temps réel) → mastodon_stream.py → Redis Queue → 
 - **Python 3.8+** : Pour exécuter les scripts Python
   - Vérifier : `python --version`
 
-- **Git** (optionnel) : Pour versionner le projet
+- **Git** : Pour versionner le projet
 
-### Compte Mastodon (GRATUIT et streaming temps réel !)
-
-✅ **EXCELLENTE NOUVELLE : Mastodon API est 100% GRATUITE et supporte le streaming temps réel !**
+### Compte Mastodon
 
 Avantages de Mastodon :
-- ✅ **100% Gratuit** (pas de limitations)
-- ✅ **Streaming temps réel** via WebSocket (pas de polling !)
-- ✅ **Sans restrictions** de compte ou d'applications
-- ✅ **Réseau décentralisé** : choisis ton instance (mastodon.social, mastodon.art, etc.)
-- ✅ **API simple** : pas besoin de Devvit ou de processus complexe
+-  **100% Gratuit** (pas de limitations)
+-  **Streaming temps réel** via WebSocket (pas de polling !)
+-  **Sans restrictions** de compte ou d'applications
+-  **Réseau décentralisé** : choisis ton instance (mastodon.social, mastodon.art, etc.)
+-  **API simple** : pas besoin de Devvit ou de processus complexe
 
 **Pour créer une application Mastodon :**
 1. **Choisis une instance Mastodon** (tu peux en créer un compte gratuitement) :
@@ -179,55 +177,37 @@ docker compose logs -f kibana
 - Kibana : http://localhost:5601
 - Redis : Vérifier avec `docker compose ps`
 
-### 2. Lancer la collecte Twitter
-
-**Choisis ton script selon ce que tu veux :**
-
-#### Option A : Tweets de test (RECOMMANDÉ - gratuit, pas besoin de Bearer Token)
+### 2. Lancer la collecte Mastodon
 
 ```bash
 # Dans le terminal, depuis le dossier du projet
-python twitter_stream_mock.py
+python mastodon_stream.py
 ```
 
 **Ce que fait le script :**
-- Génère des tweets fictifs réalistes
-- Simule le streaming Twitter
-- Normalise chaque tweet en JSON
-- Envoie les tweets dans Redis (queue `tweets_queue`)
-
-✅ **Parfait pour tester le pipeline sans payer !**
-
-#### Option B : Vrais tweets (nécessite un accès API payant)
-
-```bash
-# Dans le terminal, depuis le dossier du projet
-python twitter_stream.py
-```
-
-**Ce que fait le script :**
-- Se connecte à l'API Twitter
-- Écoute les tweets en temps réel selon les hashtags configurés
-- Normalise chaque tweet en JSON
-- Envoie les tweets dans Redis (queue `tweets_queue`)
+- Se connecte à l'API Mastodon (GRATUITE et streaming temps réel)
+- Stream le timeline public filtré par hashtags
+- Normalise chaque toot en JSON
+- Envoie les toots dans Redis (queue `mastodon_queue`)
 
 **Hashtags suivis par défaut :**
-- #Maroc
-- #IA
-- #Gaza
-- #python
-- #NoSQL
+- #Maroc, #Morocco
+- #IA, #AI, #IntelligenceArtificielle
+- #python, #Python
+- #NoSQL, #nosql
+- #MachineLearning
+- #tech, #technology, #coding, #programming, #opensource, #dev, #development
 
 **Pour modifier les hashtags :**
 
-Édite le fichier correspondant (`twitter_stream.py` ou `twitter_stream_mock.py`), variable `hashtags_to_follow` :
+Édite le fichier `mastodon_stream.py`, variable `hashtags_to_follow` (ligne ~414) :
 
 ```python
 hashtags_to_follow = [
     'Maroc',
     'IA',
-    'Gaza',
-    # Ajoute tes hashtags ici
+    'python',
+    # Ajoute tes hashtags ici (sans le #)
 ]
 ```
 
@@ -341,9 +321,8 @@ docker exec -it redis redis-cli LRANGE mastodon_queue 0 0
 NoSQL Project/
 ├── docker-compose.yml          # Configuration Docker (ES, Kibana, Redis)
 ├── requirements.txt            # Dépendances Python
-├── env.example                 # Modèle de fichier .env
 ├── .env                        # Configuration (à créer - NON COMMITÉ)
-├── mastodon_stream.py          # Script de collecte Mastodon (API GRATUITE + Streaming temps réel !)
+├── mastodon_stream.py          # Script de collecte Mastodon 
 ├── validate_pipeline.py        # Script de validation du pipeline
 ├── README.md                   # Cette documentation
 ├── rapport_validation.md       # Rapport généré (après validation)
@@ -447,7 +426,7 @@ sudo sysctl -w vm.max_map_count=262144
 
 ### Problème : Erreur "Module not found"
 
-**Erreur :** `ModuleNotFoundError: No module named 'tweepy'`
+**Erreur :** `ModuleNotFoundError: No module named 'mastodon'` ou autres modules manquants
 
 **Solution :**
 1. Vérifie que tu es dans l'environnement virtuel : `.\venv\Scripts\Activate.ps1`
