@@ -31,7 +31,8 @@ services:
       - xpack.security.enabled=false
       # Configuration de la mémoire Java
       # On limite à 1GB pour ne pas surcharger la machine
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
       # Désactivation des télémetries Elasticsearch (optionnel)
       - xpack.security.enrollment.enabled=false
       
@@ -41,11 +42,11 @@ services:
       # Port 9300 : Communication inter-nœuds (non utilisé en single-node mais gardé)
       - "9300:9300"
       # Sans volumes, les données disparaissent quand on arrête le conteneur
-    volumes:
+    #volumes:
       # Le dossier ./data/elasticsearch sur notre machine
       # sera monté dans /usr/share/elasticsearch/data dans le conteneur
       # comme ça, on garde les données même si on redémarre Docker
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
+      #-./data/elasticsearch:/usr/share/elasticsearch/data
     # Politique de redémarrage automatique
     restart: unless-stopped
     # Réseau pour que les services communiquent entre eux
