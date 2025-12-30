@@ -43,6 +43,8 @@ services:
       - "9300:9300"
       # Sans volumes, les données disparaissent quand on arrête le conteneur
     #volumes:
+    volumes: 
+      - es_data:/usr/share/elasticsearch/data
       # Le dossier ./data/elasticsearch sur notre machine
       # sera monté dans /usr/share/elasticsearch/data dans le conteneur
       # comme ça, on garde les données même si on redémarre Docker
@@ -82,7 +84,7 @@ services:
       - elasticsearch
     volumes:
       # Les configurations Kibana seront sauvegardées ici
-      - ./data/kibana:/usr/share/kibana/data
+      - kibana_data:/usr/share/kibana/data
     
     # Redémarrage automatique
     restart: unless-stopped
@@ -127,6 +129,9 @@ networks:
     # Type de réseau bridge (par défaut)
     # Permet aux conteneurs de communiquer entre eux
     driver: bridge
+volumes:
+  kibana_data:
+  es_data:
 
 # ================================================
 # NOTES IMPORTANTES
