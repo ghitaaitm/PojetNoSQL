@@ -1,12 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-WORKER ABSA V2 (Extended) - Version Corrigée Finale
-- Écrit TOUJOURS emotions_flat (keyword) en plus de emotions (source)
-- Template + mapping garantis au démarrage
-- Backfill optionnel pour anciens documents
-- Détection mapping robuste, logs détaillés
-"""
+
+
 
 import os, sys, re, json, time, signal, logging, random
 from datetime import datetime, timezone
